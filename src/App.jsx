@@ -1,4 +1,3 @@
-import { Route, Switch } from 'react-router-dom'
 import './App.css'
 import Home from './routes/home'
 import Nav from './components/layout/nav';
@@ -10,12 +9,10 @@ setupIonicReact();
 
 function App() {
   return (
-    <Switch>
-      <Route path={`/`}>
-        <Nav/>
-        <Home/>
-      </Route>
-    </Switch>
+    <>
+      <Nav/>
+      <Home/>
+    </>
   )
 }
 

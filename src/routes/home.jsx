@@ -5,17 +5,30 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
   IonList,
-  IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonSpinner
+  IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonSpinner, IonButton, IonModal, IonRefresher, IonRefresherContent
 } from '@ionic/react';
 import { getPokemons } from "../functions/fetchs/getPokemons";
+import { Link } from "react-router-dom";
+import PokemonCard from "../components/customs/pokemonsCard";
 
 export default function Home(){
-  var [offset,setOffset] = useState(0)
+  var [offsetUsed,setOffsetUsed] = useState([])
   var [pokemons,setPokemons] = useState(null)
 
-  useEffect(async() => {
-    setPokemons(await getPokemons(offset))
+  useEffect(() => {
+    getPokemons(offsetUsed)
+    .then(res => {setPokemons(res.results);setOffsetUsed([...offsetUsed,res.randomOffset])})
+    
   },[])
+
+
+  async function handleRefresh(event){
+    var newPokemons = await getPokemons([])
+    setPokemons([...newPokemons.results])
+    setOffsetUsed([newPokemons.randomOffset])
+    event.detail.complete()
+  }
+
 
   if(!pokemons){
     return (
@@ -27,26 +40,26 @@ export default function Home(){
   }
 
 
+
   return (
     <Main className={"flex flex-wrap"}>
       <IonContent className="h-[calc(100vh-96px)]">
-      <IonList className="flex flex-wrap gap-5 items-center justify-evenly px-4">
-        {pokemons && pokemons.map((item, index) => (  
-          <IonCard key={item.name} className="flex-1 basis-60 flex flex-col items-center">
-            <img className="h-40" alt={`avatar ${item.name}`} src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${item.url.split("/")[6]}.png`} />
-            <IonCardHeader>
-              <IonCardTitle className="capitalize">{item.name}</IonCardTitle>
-            </IonCardHeader>
-          </IonCard>
-        ))}
-      </IonList>
-      <IonInfiniteScroll
-        onIonInfinite={async(ev) => {
-          setPokemons([...pokemons,...await getPokemons(offset + 20)])
-          setOffset(prev => prev + 20)
-          setTimeout(() => ev.target.complete(), 500);
-        }}
-      >
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
+        <IonList className="flex flex-wrap gap-5 items-center justify-evenly px-4">
+          {pokemons && pokemons.map((item, index) => (
+            <PokemonCard key={item.name} item={item} index={index} id={item.url.split("/")[6]}/>
+          ))}
+        </IonList>
+        <IonInfiniteScroll
+          onIonInfinite={async(ev) => {
+            var res = await getPokemons(offsetUsed)
+            setOffsetUsed([...offsetUsed,res.randomOffset])
+            setPokemons([...pokemons,...res.results])
+            setTimeout(() => ev.target.complete(), 500);
+          }}
+        >
         <IonInfiniteScrollContent></IonInfiniteScrollContent>
       </IonInfiniteScroll>
     </IonContent>
