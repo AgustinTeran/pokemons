@@ -8,7 +8,6 @@ import {
   IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonSpinner, IonButton, IonModal, IonRefresher, IonRefresherContent
 } from '@ionic/react';
 import { getPokemons } from "../functions/fetchs/getPokemons";
-import { Link } from "react-router-dom";
 import PokemonCard from "../components/customs/pokemonsCard";
 
 export default function Home(){
